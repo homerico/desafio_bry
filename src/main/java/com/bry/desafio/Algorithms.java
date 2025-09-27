@@ -5,17 +5,31 @@ import java.util.stream.Stream;
 
 public class Algorithms {
 
-    public enum SUPPORTED_DIGEST_ALGORITHMS {
+    public enum DIGEST_ALGORITHMS {
         SHA512("SHA-512"),;
 
         private final String name;
 
-        SUPPORTED_DIGEST_ALGORITHMS(String name) {
+        DIGEST_ALGORITHMS(String name) {
             this.name = name;
         }
     }
 
     public static List<String> getSupportedDigestAlgorithms() {
-        return Stream.of(SUPPORTED_DIGEST_ALGORITHMS.values()).map(Enum::name).toList();
+        return Stream.of(DIGEST_ALGORITHMS.values()).map(Enum::name).toList();
+    }
+
+    public enum SIGNATURE_ALGORITHMS {
+        SHA512withRSA("SHA512withRSA"),;
+
+        private final String name;
+
+        SIGNATURE_ALGORITHMS(String name) {
+            this.name = name;
+        }
+    }
+
+    public static List<String> getSupportedSignatureAlgorithms() {
+        return Stream.of(SIGNATURE_ALGORITHMS.values()).map(Enum::name).toList();
     }
 }
