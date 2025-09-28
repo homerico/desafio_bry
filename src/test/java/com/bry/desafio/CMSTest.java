@@ -1,9 +1,12 @@
 package com.bry.desafio;
 
 
+import com.bry.desafio.report.Report;
 import com.bry.desafio.signer.CMSSigner;
 import com.bry.desafio.signer.SignerException;
 import com.bry.desafio.utils.KeyStoreUtils;
+import com.bry.desafio.verifier.CMSVerifier;
+import com.bry.desafio.verifier.VerifierException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.AfterAll;
@@ -11,6 +14,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
@@ -28,6 +33,7 @@ public class CMSTest {
     private static final String digestAlgorithm = Algorithms.DIGEST_ALGORITHMS.SHA512.name();
     private static final String signatureAlgorithm = Algorithms.SIGNATURE_ALGORITHMS.SHA512withRSA.name();
     private static final String docToBeSigned = "arquivos/doc.txt";
+    private static final String trustAnchorPath = "cadeia/";
     private static final String keyStoreFile = "pkcs12/certificado_teste_hub.pfx";
     private static final String artifactsPath = "artefatos/";
     private static final String digestFile = "resumo.txt";
@@ -39,9 +45,17 @@ public class CMSTest {
 
     @BeforeAll
     public static void setup() {
-        // Adiciona o provider Bouncy Castle
-        Security.addProvider(new BouncyCastleProvider());
+        // Adiciona o provider Bouncy Castle como o primeiro da lista, assim sempre será ele a prover os serviços
+        Security.insertProviderAt(new BouncyCastleProvider(), 1);
 
+        // Carrega as âncoras de confiança
+        try {
+            TrustAnchors.loadTrustAnchors(trustAnchorPath);
+        } catch (CertificateException | IOException | URISyntaxException e) {
+            fail("Falha ao carregar as âncoras de confiança.", e);
+        }
+
+        // Carrega o conteúdo a ser assinado
         try (InputStream is = CMSTest.class.getClassLoader().getResourceAsStream(docToBeSigned)){
             assertNotNull(is);
             content = is.readAllBytes();
@@ -49,6 +63,7 @@ public class CMSTest {
             fail("Falha ao carregar documento a ser assinado.", e);
         }
 
+        // Carrega o repositório de chaves
         try (InputStream is = CMSTest.class.getClassLoader().getResourceAsStream(keyStoreFile)) {
             assertNotNull(is);
             keyStore = KeyStoreUtils.getKeyStore(is, certificatePassword.toCharArray());
@@ -71,12 +86,12 @@ public class CMSTest {
         }
         try {
             Path digestPath = Paths.get(artifactsPath + digestFile);
-            try (OutputStream os = new BufferedOutputStream(java.nio.file.Files.newOutputStream(digestPath))) {
+            try (OutputStream os = new BufferedOutputStream(Files.newOutputStream(digestPath))) {
                 os.write(digestHexString.getBytes());
             }
 
             Path signaturePath = Paths.get(artifactsPath + signatureFile);
-            try (OutputStream os = new BufferedOutputStream(java.nio.file.Files.newOutputStream(signaturePath))) {
+            try (OutputStream os = new BufferedOutputStream(Files.newOutputStream(signaturePath))) {
                 os.write(signedContent);
             }
         } catch (IOException e) {
@@ -85,6 +100,9 @@ public class CMSTest {
         }
     }
 
+    /**
+     * Verifica se o hash do conteúdo é gerado corretamente e corresponde ao valor de referência.
+     */
     @Test
     public void isDigestValid() {
         ToBeSignedContent toBeSignedContent = new ToBeSignedContent(content);
@@ -100,8 +118,11 @@ public class CMSTest {
         assertEquals(digestReference, digestHexString);
     }
 
+    /** Verifica se a assinatura CMS é gerada corretamente e se é possível validá-la com sucesso.
+     * Também testa se o certificado do assinante pode ser validado até uma âncora de confiança.
+     */
     @Test
-    public void isSignerSigning() {
+    public void isSignatureValid() {
         try {
             PrivateKey privateKey = KeyStoreUtils.getPrivateKeyData(keyStore, certificateAlias, certificatePassword.toCharArray());
 
@@ -109,14 +130,21 @@ public class CMSTest {
 
             CMSSigner cmsSigner = new CMSSigner(x509Certificate, privateKey, signatureAlgorithm);
             signedContent = cmsSigner.sign(content);
-        } catch (SignerException e) {
+
+            assertNotNull(signedContent);
+            assertTrue(signedContent.length > 0);
+
+            CMSVerifier signatureVerifier = new CMSVerifier();
+            signatureVerifier.verify(signedContent);
+
+            Report report = signatureVerifier.getVerificationReport();
+            assertTrue(report.isIntegrityValid());
+            assertTrue(report.isCertificateTrusted());
+        } catch (SignerException | VerifierException e) {
             fail(e.getMessage(), e.getCause());
         } catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException |
                  CertificateException e) {
             fail("Falha ao obter os dados do certificado ou da chave privada.", e);
         }
-
-        assertNotNull(signedContent);
-        assertTrue(signedContent.length > 0);
     }
 }
