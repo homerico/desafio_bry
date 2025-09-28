@@ -6,7 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.security.Security;
 
-@SpringBootApplication(scanBasePackages = "com.bry.desafio")
+/**
+ * Classe principal para iniciar a aplicação Spring Boot.
+ */
+@SpringBootApplication
 public class Application {
 
 	static {

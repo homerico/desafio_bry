@@ -17,13 +17,16 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+/**
+ * Serviço para criação e verificação de assinaturas.
+ */
 @Service
 public class SignatureService {
 
     public byte[] createCmsSignature(byte[] content, byte[] pkcs12Content, String password) throws SignerException, CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException, UnrecoverableKeyException {
         KeyStore keyStore = KeyStoreUtils.getKeyStore(new ByteArrayInputStream(pkcs12Content), password.toCharArray());
 
-        // Como o alias não é fornecido, assumi-se que é o mesmo do Configuration.certificateAlias
+        // Como o alias não é fornecido, assumi-se que é o mesmo passado pelo desafio
         PrivateKey privateKey = KeyStoreUtils.getPrivateKeyData(keyStore, Configuration.certificateAlias, password.toCharArray());
 
         X509Certificate x509Certificate = KeyStoreUtils.getCertificateData(keyStore, Configuration.certificateAlias);

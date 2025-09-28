@@ -3,6 +3,9 @@ package com.bry.desafio.signature;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Classe que define os algoritmos suportados para digest e assinatura.
+ */
 public class Algorithms {
 
     public enum DIGEST_ALGORITHMS {

@@ -2,9 +2,16 @@ package com.bry.desafio.web.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+/**
+ * Classe que representa a resposta da verificação de assinatura.
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VerificationResponse {
+    /** Status da verificação */
     private String status;
+    /** Detalhes da verificação
+     * @see Details
+     */
     private Details details;
 
     public String getStatus() {

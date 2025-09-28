@@ -13,6 +13,9 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Base64;
 
+/**
+ * Controlador REST para operações de assinatura e verificação.
+ */
 @RestController
 @RequestMapping("/desafio")
 public class SignatureController {
@@ -23,6 +26,14 @@ public class SignatureController {
         this.signatureService = signatureService;
     }
 
+    /**
+     * Endpoint para criar uma assinatura.
+     *
+     * @param file        O arquivo a ser assinado.
+     * @param pkcs12File O KeyStore PKCS#12 contendo o certificado e a chave privada.
+     * @param password    A senha do arquivo PKCS#12.
+     * @return A assinatura em Base64 ou uma mensagem de erro.
+     */
     @PostMapping("/assinar")
     public ResponseEntity<String> createSignature(
             @RequestParam("file") MultipartFile file,
@@ -48,6 +59,12 @@ public class SignatureController {
         }
     }
 
+    /**
+     * Endpoint para verificar uma assinatura.
+     *
+     * @param signatureFile O arquivo de assinatura a ser verificado.
+     * @return O resultado da verificação.
+     */
     @PostMapping("/verificar")
     public ResponseEntity<VerificationResponse> verifySignature(
             @RequestParam("signature") MultipartFile signatureFile) {

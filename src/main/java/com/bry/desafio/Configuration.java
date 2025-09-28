@@ -2,6 +2,9 @@ package com.bry.desafio;
 
 import com.bry.desafio.signature.Algorithms;
 
+/**
+ * Classe responsável por armazenar as configurações da aplicação.
+ */
 public class Configuration {
     public static final String certificateAlias = "{e2618a8b-20de-4dd2-b209-70912e3177f4}";
     public static final String digestAlgorithm = Algorithms.DIGEST_ALGORITHMS.SHA512.name();

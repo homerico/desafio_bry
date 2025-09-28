@@ -8,6 +8,9 @@ import java.security.NoSuchAlgorithmException;
 import static com.bry.desafio.signature.signer.SignerException.INVALID_DIGEST_ALGORITHM;
 import static com.bry.desafio.signature.signer.SignerException.NOT_SUPPORTED_DIGEST_ALGORITHM;
 
+/**
+ * Classe que representa o conteúdo a ser assinado.
+ */
 public class ToBeSignedContent {
 
     private final byte[] content;
@@ -20,6 +23,13 @@ public class ToBeSignedContent {
         return content;
     }
 
+    /**
+     * Gera o hash do conteúdo usando o algoritmo de digest especificado.
+     *
+     * @param digestAlgorithm O algoritmo de digest a ser usado (ex: "SHA-512").
+     * @return O hash do conteúdo.
+     * @throws SignerException Se o algoritmo de digest não for suportado ou inválido.
+     */
     public byte[] getHash(String digestAlgorithm) throws SignerException {
         if (!Algorithms.getSupportedDigestAlgorithms().contains(digestAlgorithm)) {
             throw new SignerException(NOT_SUPPORTED_DIGEST_ALGORITHM + digestAlgorithm);
