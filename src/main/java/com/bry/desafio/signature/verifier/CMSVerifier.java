@@ -1,7 +1,10 @@
 package com.bry.desafio.signature.verifier;
 
-import com.bry.desafio.Exceptions.VerifierException;
-import com.bry.desafio.signature.TrustAnchors;
+import com.bry.desafio.exceptions.SignerCertificateException;
+import com.bry.desafio.exceptions.VerifierException;
+import com.bry.desafio.signature.certificate.SignerCertificateWrapper;
+import com.bry.desafio.signature.certificate.TrustAnchors;
+import com.bry.desafio.signature.report.CertificateReport;
 import com.bry.desafio.signature.report.Report;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
@@ -11,7 +14,6 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.util.Selector;
 import org.bouncycastle.util.Store;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -19,7 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
 import java.util.*;
 
-import static com.bry.desafio.Exceptions.VerifierException.SIGNATURE_PROCESSING_ERROR;
+import static com.bry.desafio.exceptions.VerifierException.SIGNATURE_PROCESSING_ERROR;
 
 /**
  * Classe para verificação de assinaturas no formato CMS (Cryptographic Message Syntax).
@@ -29,6 +31,7 @@ import static com.bry.desafio.Exceptions.VerifierException.SIGNATURE_PROCESSING_
 public class CMSVerifier {
 
     private final Report verificationReport = new Report();
+    private SignerCertificateWrapper signerCertificateWrapper;
 
     /**
      * Verifica a integridade e a confiança de uma assinatura.
@@ -49,57 +52,36 @@ public class CMSVerifier {
         SignerInformationStore signers = signature.getSignerInfos();
         Collection<SignerInformation> signerCollection = signers.getSigners();
 
-        // Assume-se que há apenas um signatário, mas poderia ser estendido para múltiplos (coassinaturas)
+        // Assume-se que pode ter apenas um signatário, mas poderia ser estendido para múltiplos (coassinaturas)
         Iterator<SignerInformation> iterator = signerCollection.iterator();
         if (iterator.hasNext()) {
             SignerInformation signer = iterator.next();
-            Collection<X509CertificateHolder> certCollection = certStore.getMatches(signer.getSID());
+            try {
+                this.signerCertificateWrapper = new SignerCertificateWrapper(certStore, signer);
+            } catch (SignerCertificateException | CertificateException e) {
+                throw new RuntimeException(e);
+            }
 
             // Verifica a integridade da assinatura
             boolean isIntegrityValid;
             try {
-                X509Certificate signerCertificate = new JcaX509CertificateConverter().getCertificate(certCollection.iterator().next());
-                isIntegrityValid = signer.verify(new JcaSimpleSignerInfoVerifierBuilder().build(signerCertificate));
-            } catch (CertificateException | OperatorCreationException | CMSException e) {
+                isIntegrityValid = signer.verify(new JcaSimpleSignerInfoVerifierBuilder().build(signerCertificateWrapper.getSignerCertificate()));
+            } catch (OperatorCreationException | CMSException e) {
                 isIntegrityValid = false;
-                verificationReport.setException(e);
+                verificationReport.setException(e.getMessage());
             }
 
             verificationReport.setIntegrityValid(isIntegrityValid);
 
+            // Verifica a confiança do certificado do assinante
             try {
-                Set<TrustAnchor> trustAnchors = TrustAnchors.getTrustAnchors();
-                Set<X509Certificate> intermediateCertificates = TrustAnchors.getIntermediateCertificates();
-
-                List<Certificate> certChain = new ArrayList<>();
-
-                // Adiciona todos os certificados presentes na assinatura
-                // (Sabe-se que há apenas o certificado do assinante, mas poderia haver os intermediários também)
-                Collection<X509CertificateHolder> holders = certStore.getMatches(new AllCertSelector());
-                for (X509CertificateHolder holder : holders) {
-                    certChain.add(new JcaX509CertificateConverter().getCertificate(holder));
-                }
-
-                // Adiciona os certificados intermediários da cadeia de confiança, caso não estiverem presentes ainda
-                for (X509Certificate intermediateCertificate : intermediateCertificates) {
-                    if (!certChain.contains(intermediateCertificate)) {
-                        certChain.add(intermediateCertificate);
-                    }
-                }
-
-                CertPath certPath = CertificateFactory.getInstance("X.509").generateCertPath(certChain);
-
-                PKIXParameters pkixParams = new PKIXParameters(trustAnchors);
-                pkixParams.setRevocationEnabled(false);
-
-                CertPathValidator validator = CertPathValidator.getInstance("PKIX");
-                validator.validate(certPath, pkixParams);
+                signerCertificateWrapper.validate(certStore);
 
                 verificationReport.setCertificateTrusted(true);
             } catch (CertificateException | CertPathValidatorException | InvalidAlgorithmParameterException |
                      NoSuchAlgorithmException e) {
                 verificationReport.setCertificateTrusted(false);
-                verificationReport.setException(e);
+                verificationReport.setException(e.getMessage());
             }
 
         }
@@ -107,26 +89,5 @@ public class CMSVerifier {
 
     public Report getVerificationReport() {
         return verificationReport;
-    }
-
-    /**
-     * Um Selector que seleciona todos os certificados
-     */
-    private static class AllCertSelector implements Selector<X509CertificateHolder> {
-
-        /**
-         * @return Sempre é true, selecionando todos os certificados
-         *
-         * @see org.bouncycastle.util.Selector#match(java.lang.Object)
-         */
-        @Override
-        public boolean match(X509CertificateHolder holder) {
-            return true;
-        }
-
-        @Override
-        public Object clone() {
-            return new AllCertSelector();
-        }
     }
 }

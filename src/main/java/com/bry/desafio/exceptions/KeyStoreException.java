@@ -1,4 +1,4 @@
-package com.bry.desafio.Exceptions;
+package com.bry.desafio.exceptions;
 
 public class KeyStoreException extends Exception{
     public static final String KEYSTORE_LOADING_ERROR = "Erro ao carregar o KeyStore.";

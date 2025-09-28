@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * Classe que representa os detalhes da verificação de assinatura.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Details {
+public class VerificationDetails {
     /** Validade da assinatura */
     private String signatureValidity;
     /** Confiança do certificado */
@@ -14,9 +14,9 @@ public class Details {
     /** Mensagem de erro, se houver */
     private String errorMessage;
     /** Informações extras sobre a assinatura
-     * @see ExtraInfos
+     * @see CertificateInfos
      */
-    private ExtraInfos extraInfos;
+    private CertificateInfos certificateInfos;
 
     public String getSignatureValidity() {
         return signatureValidity;
@@ -42,11 +42,11 @@ public class Details {
         this.errorMessage = errorMessage;
     }
 
-    public ExtraInfos getExtraInfos() {
-        return extraInfos;
+    public CertificateInfos getExtraInfos() {
+        return certificateInfos;
     }
 
-    public void setExtraInfos(ExtraInfos extraInfos) {
-        this.extraInfos = extraInfos;
+    public void setExtraInfos(CertificateInfos certificateInfos) {
+        this.certificateInfos = certificateInfos;
     }
 }

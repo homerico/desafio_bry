@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * Classe que representa informações extras sobre a assinatura.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ExtraInfos {
+public class CertificateInfos {
     /** Nome do assinante */
     private String signerName;
     /** Data da assinatura */

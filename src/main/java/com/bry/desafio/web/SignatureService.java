@@ -1,14 +1,14 @@
 package com.bry.desafio.web;
 
 import com.bry.desafio.Configuration;
-import com.bry.desafio.Exceptions.KeyStoreException;
+import com.bry.desafio.exceptions.KeyStoreException;
 import com.bry.desafio.signature.report.Report;
 import com.bry.desafio.signature.signer.CMSSigner;
-import com.bry.desafio.Exceptions.SignerException;
+import com.bry.desafio.exceptions.SignerException;
 import com.bry.desafio.signature.utils.KeyStoreUtils;
 import com.bry.desafio.signature.verifier.CMSVerifier;
-import com.bry.desafio.Exceptions.VerifierException;
-import com.bry.desafio.web.DTOs.Details;
+import com.bry.desafio.exceptions.VerifierException;
+import com.bry.desafio.web.DTOs.VerificationDetails;
 import com.bry.desafio.web.DTOs.VerificationResponse;
 import org.springframework.stereotype.Service;
 
@@ -45,13 +45,13 @@ public class SignatureService {
 
         response.setStatus(report.isValid().toString());
 
-        Details details = new Details();
-        details.setSignatureValidity(report.isIntegrityValid().toString());
-        details.setCertificateTrust(report.isCertificateTrusted().toString());
+        VerificationDetails verificationDetails = new VerificationDetails();
+        verificationDetails.setSignatureValidity(report.isIntegrityValid().toString());
+        verificationDetails.setCertificateTrust(report.isCertificateTrusted().toString());
         if (report.getException() != null) {
-            details.setErrorMessage(report.getException().getMessage());
+            verificationDetails.setErrorMessage(report.getException());
         }
-        response.setDetails(details);
+        response.setVerificationDetails(verificationDetails);
 
         return response;
     }

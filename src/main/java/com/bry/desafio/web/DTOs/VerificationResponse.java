@@ -10,27 +10,27 @@ public class VerificationResponse {
     /** Status da verificação */
     private String status;
     /** Detalhes da verificação
-     * @see Details
+     * @see VerificationDetails
      */
-    private Details details;
+    private VerificationDetails verificationDetails;
 
     public String getStatus() {
         return status;
+    }
+
+    public VerificationDetails getVerificationDetails() {
+        return verificationDetails;
     }
 
     public void setStatus(String status) {
         this.status = status;
     }
 
-    public Details getDetails() {
-        return details;
-    }
-
-    public void setDetails(Details details) {
-        this.details = details;
+    public void setVerificationDetails(VerificationDetails verificationDetails) {
+        this.verificationDetails = verificationDetails;
     }
 
     public void setErrorMessage(String message) {
-        details.setErrorMessage(message);
+        verificationDetails.setErrorMessage(message);
     }
 }

@@ -1,4 +1,6 @@
-package com.bry.desafio.signature;
+package com.bry.desafio.signature.certificate;
+
+import com.bry.desafio.exceptions.SignerCertificateException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +14,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.bry.desafio.exceptions.SignerCertificateException.TRUST_ANCHOR_NOT_FOUND;
+
 /**
  * Classe responsável por carregar e armazenar as âncoras de confiança e certificados intermediários.
  */
@@ -20,7 +24,7 @@ public class TrustAnchors {
     private static final Set<TrustAnchor> trustAnchors = new HashSet<>();
     private static final Set<X509Certificate> intermediateCertificates = new HashSet<>();
 
-    public static void loadTrustAnchors(String trustAnchorCertificatePath) throws CertificateException, IOException, URISyntaxException {
+    public static void loadTrustAnchors(String trustAnchorCertificatePath) throws CertificateException, IOException, URISyntaxException, SignerCertificateException {
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
 
         // Pega o Path dos certificados presentes na pasta especificada
@@ -39,6 +43,9 @@ public class TrustAnchors {
                 }
                 in.close();
             }
+        }
+        if (trustAnchors.isEmpty()) {
+            throw new SignerCertificateException(TRUST_ANCHOR_NOT_FOUND);
         }
     }
 

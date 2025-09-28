@@ -1,7 +1,7 @@
 package com.bry.desafio.web;
 
-import com.bry.desafio.Exceptions.KeyStoreException;
-import com.bry.desafio.Exceptions.SignerException;
+import com.bry.desafio.exceptions.KeyStoreException;
+import com.bry.desafio.exceptions.SignerException;
 import com.bry.desafio.web.DTOs.VerificationResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

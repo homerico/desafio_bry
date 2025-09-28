@@ -1,7 +1,7 @@
 package com.bry.desafio.web;
 
 import com.bry.desafio.Configuration;
-import com.bry.desafio.signature.TrustAnchors;
+import com.bry.desafio.signature.certificate.TrustAnchors;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 

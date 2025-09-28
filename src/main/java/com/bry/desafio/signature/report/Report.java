@@ -7,46 +7,20 @@ package com.bry.desafio.signature.report;
  */
 public class Report {
 
-    public enum Status {
-        VALID("Válido"), INVALID("Inválido"),
-        TRUSTED("Confiável"), UNTRUSTED("Não Confiável"),
-        INDETERMINATE("Indeterminado");
-
-        private final String name;
-
-        Status(String name) {
-            this.name = name;
-        }
-        
-        public static Status allValid(Status... statuses) {
-            for (Status status : statuses) {
-                if (status != VALID && status != TRUSTED) {
-                    return INVALID;
-                }
-            }
-            return VALID;
-        }
-        
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
 
     // Status da integridade da assinatura
     private Status isIntegrityValid;
-    // Status da confiança do certificação
-    private Status isCertificateTrusted;
     // Erro ocorrido durante o processo de verificação, se houver
-    private Exception exception;
+    private String exception;
+    private CertificateReport certificateReport;
 
     public Report() {
         this.isIntegrityValid = Status.INDETERMINATE;
-        this.isCertificateTrusted = Status.INDETERMINATE;
+        this.certificateReport = new CertificateReport();
     }
 
     public Status isValid() {
-        return Status.allValid(isIntegrityValid, isCertificateTrusted, exception == null ? Status.VALID : Status.INVALID);
+        return allValid(isIntegrityValid, certificateReport.getIsCertificateTrusted(), exception == null ? Status.VALID : Status.INVALID);
     }
 
     public Status isIntegrityValid() {
@@ -54,10 +28,10 @@ public class Report {
     }
 
     public Status isCertificateTrusted() {
-        return isCertificateTrusted;
+        return certificateReport.getIsCertificateTrusted();
     }
 
-    public Exception getException() {
+    public String getException() {
         return exception;
     }
 
@@ -66,10 +40,19 @@ public class Report {
     }
 
     public void setCertificateTrusted(boolean certificateTrusted) {
-        isCertificateTrusted = certificateTrusted ? Status.TRUSTED : Status.UNTRUSTED;
+        certificateReport.setIsCertificateTrusted(certificateTrusted);
     }
 
-    public void setException(Exception exception) {
+    public void setException(String exception) {
         this.exception = exception;
+    }
+
+    public static Status allValid(Status... statuses) {
+        for (Status status : statuses) {
+            if (status != Status.VALID && status != Status.TRUSTED) {
+                return Status.INVALID;
+            }
+        }
+        return Status.VALID;
     }
 }

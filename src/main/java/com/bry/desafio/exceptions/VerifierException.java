@@ -1,4 +1,4 @@
-package com.bry.desafio.Exceptions;
+package com.bry.desafio.exceptions;
 
 public class VerifierException extends Exception{
 

@@ -1,6 +1,6 @@
 package com.bry.desafio.signature.utils;
 
-import com.bry.desafio.Exceptions.KeyStoreException;
+import com.bry.desafio.exceptions.KeyStoreException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +12,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import static com.bry.desafio.Exceptions.KeyStoreException.*;
+import static com.bry.desafio.exceptions.KeyStoreException.*;
 
 /**
  * Utilitário para operações com KeyStore.

@@ -2,13 +2,16 @@ package com.bry.desafio.signature;
 
 
 import com.bry.desafio.Configuration;
-import com.bry.desafio.Exceptions.KeyStoreException;
+import com.bry.desafio.exceptions.KeyStoreException;
+import com.bry.desafio.exceptions.SignerCertificateException;
+import com.bry.desafio.signature.certificate.TrustAnchors;
 import com.bry.desafio.signature.report.Report;
+import com.bry.desafio.signature.report.Status;
 import com.bry.desafio.signature.signer.CMSSigner;
-import com.bry.desafio.Exceptions.SignerException;
+import com.bry.desafio.exceptions.SignerException;
 import com.bry.desafio.signature.utils.KeyStoreUtils;
 import com.bry.desafio.signature.verifier.CMSVerifier;
-import com.bry.desafio.Exceptions.VerifierException;
+import com.bry.desafio.exceptions.VerifierException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.AfterAll;
@@ -48,8 +51,8 @@ public class CMSTest {
         // Carrega as âncoras de confiança
         try {
             TrustAnchors.loadTrustAnchors(Configuration.trustAnchorPath);
-        } catch (CertificateException | IOException | URISyntaxException e) {
-            fail("Falha ao carregar as âncoras de confiança.", e);
+        } catch (CertificateException | IOException | URISyntaxException | SignerCertificateException e) {
+            fail("Falha ao carregar as âncoras de confiança :", e);
         }
 
         // Carrega o conteúdo a ser assinado
@@ -137,8 +140,8 @@ public class CMSTest {
             signatureVerifier.verify(signedContent);
 
             Report report = signatureVerifier.getVerificationReport();
-            assertEquals(Report.Status.VALID, report.isIntegrityValid());
-            assertEquals(Report.Status.TRUSTED, report.isCertificateTrusted());
+            assertEquals(Status.VALID, report.isIntegrityValid());
+            assertEquals(Status.TRUSTED, report.isCertificateTrusted());
         } catch (SignerException | VerifierException | KeyStoreException e) {
             fail(e.getMessage(), e.getCause());
         }
