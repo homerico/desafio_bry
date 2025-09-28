@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.bry</groupId>
 	<artifactId>desafio_bry</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.3.0</version>
 	<name>desafio_bry</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
@@ -61,6 +61,13 @@
 			<artifactId>junit-jupiter-api</artifactId>
 			<version>5.13.4</version>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20231013</version>
 		</dependency>
 	</dependencies>
 
