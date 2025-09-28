@@ -1,5 +1,6 @@
 package com.bry.desafio.signature.signer;
 
+import com.bry.desafio.Exceptions.SignerException;
 import com.bry.desafio.signature.Algorithms;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.*;
@@ -13,7 +14,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.bry.desafio.signature.signer.SignerException.*;
+import static com.bry.desafio.Exceptions.SignerException.*;
 
 public class CMSSigner {
 

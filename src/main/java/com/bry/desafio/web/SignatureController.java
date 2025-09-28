@@ -1,16 +1,12 @@
 package com.bry.desafio.web;
 
-import com.bry.desafio.signature.signer.SignerException;
+import com.bry.desafio.Exceptions.KeyStoreException;
+import com.bry.desafio.Exceptions.SignerException;
 import com.bry.desafio.web.DTOs.VerificationResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.Base64;
 
 /**
@@ -49,13 +45,10 @@ public class SignatureController {
             // Retorna a assinatura em Base64
             String base64Signature = Base64.getEncoder().encodeToString(signature);
             return ResponseEntity.ok(base64Signature);
-        } catch (SignerException e) {
-            return ResponseEntity.internalServerError().body("Erro interno - " + e.getMessage());
-        } catch (IOException | UnrecoverableKeyException | CertificateException | KeyStoreException |
-                 NoSuchAlgorithmException e) {
-            return ResponseEntity.badRequest().body("Erro ao processar a solicitação - " + e.getMessage());
+        } catch (SignerException | KeyStoreException e) {
+            return ResponseEntity.badRequest().body("Erro de processamento: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Erro inesperado - " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Erro inesperado: " + e.getMessage());
         }
     }
 

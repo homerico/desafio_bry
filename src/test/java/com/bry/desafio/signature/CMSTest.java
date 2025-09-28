@@ -2,12 +2,13 @@ package com.bry.desafio.signature;
 
 
 import com.bry.desafio.Configuration;
+import com.bry.desafio.Exceptions.KeyStoreException;
 import com.bry.desafio.signature.report.Report;
 import com.bry.desafio.signature.signer.CMSSigner;
-import com.bry.desafio.signature.signer.SignerException;
+import com.bry.desafio.Exceptions.SignerException;
 import com.bry.desafio.signature.utils.KeyStoreUtils;
 import com.bry.desafio.signature.verifier.CMSVerifier;
-import com.bry.desafio.signature.verifier.VerifierException;
+import com.bry.desafio.Exceptions.VerifierException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.AfterAll;
@@ -19,7 +20,9 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.*;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
@@ -61,8 +64,10 @@ public class CMSTest {
         try (InputStream is = CMSTest.class.getClassLoader().getResourceAsStream(Configuration.keyStoreFile)) {
             assertNotNull(is);
             keyStore = KeyStoreUtils.getKeyStore(is, Configuration.certificatePassword.toCharArray());
-        } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException e) {
+        } catch (IOException e) {
             fail("Falha ao carregar o repositório de chaves.", e);
+        } catch (KeyStoreException e) {
+            fail(e.getMessage(), e.getCause());
         }
     }
 
@@ -134,11 +139,8 @@ public class CMSTest {
             Report report = signatureVerifier.getVerificationReport();
             assertEquals(Report.Status.VALID, report.isIntegrityValid());
             assertEquals(Report.Status.TRUSTED, report.isCertificateTrusted());
-        } catch (SignerException | VerifierException e) {
+        } catch (SignerException | VerifierException | KeyStoreException e) {
             fail(e.getMessage(), e.getCause());
-        } catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException |
-                 CertificateException e) {
-            fail("Falha ao obter os dados do certificado ou da chave privada.", e);
         }
     }
 }

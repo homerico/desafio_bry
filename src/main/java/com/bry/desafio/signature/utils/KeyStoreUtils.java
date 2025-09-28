@@ -1,11 +1,18 @@
 package com.bry.desafio.signature.utils;
 
+import com.bry.desafio.Exceptions.KeyStoreException;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.*;
-import java.security.cert.CertificateEncodingException;
+
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+
+import static com.bry.desafio.Exceptions.KeyStoreException.*;
 
 /**
  * Utilitário para operações com KeyStore.
@@ -21,13 +28,15 @@ public class KeyStoreUtils {
      * @param password     Senha para acessar o KeyStore.
      * @return Instância do KeyStore carregado.
      * @throws KeyStoreException        Se ocorrer um erro ao criar o KeyStore.
-     * @throws CertificateException     Se ocorrer um erro ao carregar os certificados.
-     * @throws IOException              Se ocorrer um erro de I/O.
-     * @throws NoSuchAlgorithmException Se o algoritmo necessário não estiver disponível.
      */
-    public static KeyStore getKeyStore(InputStream keyStoreData, char[] password) throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
-        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-        keyStore.load(keyStoreData, password);
+    public static KeyStore getKeyStore(InputStream keyStoreData, char[] password) throws KeyStoreException {
+        KeyStore keyStore = null;
+        try {
+            keyStore = KeyStore.getInstance(keyStoreType);
+            keyStore.load(keyStoreData, password);
+        } catch (CertificateException | IOException | NoSuchAlgorithmException | java.security.KeyStoreException e) {
+            throw new KeyStoreException(KEYSTORE_LOADING_ERROR, e);
+        }
         return keyStore;
     }
 
@@ -35,13 +44,16 @@ public class KeyStoreUtils {
      * Recupera um certificado X.509 do KeyStore.
      *
      * @param keyStore Instância do KeyStore.
-     * @param alias    Alias do certificado a ser recuperado.
+     * @param alias    Alias do certificado a ser obtido.
      * @return O certificado X.509 correspondente ao alias fornecido.
-     * @throws KeyStoreException           Se ocorrer um erro ao acessar o KeyStore.
-     * @throws CertificateEncodingException Se ocorrer um erro ao codificar o certificado.
+     * @throws KeyStoreException           Se ocorrer um erro ao obter o certificado especificado.
      */
-    public static X509Certificate getCertificateData(KeyStore keyStore, String alias) throws KeyStoreException, CertificateEncodingException {
-        return (X509Certificate) keyStore.getCertificate(alias);
+    public static X509Certificate getCertificateData(KeyStore keyStore, String alias) throws KeyStoreException {
+        try {
+            return (X509Certificate) keyStore.getCertificate(alias);
+        } catch (java.security.KeyStoreException e) {
+            throw new KeyStoreException(CERTIFICATE_RETRIEVAL_ERROR, e);
+        }
     }
 
     /**
@@ -51,11 +63,13 @@ public class KeyStoreUtils {
      * @param alias    Alias da chave privada a ser recuperada.
      * @param password Senha para acessar a chave privada.
      * @return A chave privada correspondente ao alias fornecido.
-     * @throws KeyStoreException        Se ocorrer um erro ao acessar o KeyStore.
-     * @throws UnrecoverableKeyException Se a chave não puder ser recuperada (por exemplo, senha incorreta).
-     * @throws NoSuchAlgorithmException Se o algoritmo necessário não estiver disponível.
+     * @throws KeyStoreException        Se ocorrer um erro ao obter a chave privada.
      */
-    public static PrivateKey getPrivateKeyData(KeyStore keyStore, String alias, char[] password) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
-        return (PrivateKey) keyStore.getKey(alias, password);
+    public static PrivateKey getPrivateKeyData(KeyStore keyStore, String alias, char[] password) throws KeyStoreException {
+        try {
+            return (PrivateKey) keyStore.getKey(alias, password);
+        } catch (java.security.KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
+            throw new KeyStoreException(PRIVATE_KEY_RETRIEVAL_ERROR, e);
+        }
     }
 }
