@@ -9,8 +9,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class VerificationDetails {
     /** Validade da assinatura */
     private String signatureValidity;
-    /** Confiança do certificado */
-    private String certificateTrust;
+    /** Data da assinatura */
+    private String signingDate;
+    /** Hash do documento assinado */
+    private String documentHash;
+    /** Algoritmo de hash utilizado */
+    private String hashAlgorithm;
     /** Mensagem de erro, se houver */
     private String errorMessage;
     /** Informações extras sobre a assinatura
@@ -22,8 +26,16 @@ public class VerificationDetails {
         return signatureValidity;
     }
 
-    public String getCertificateTrust() {
-        return certificateTrust;
+    public String getSigningDate() {
+        return signingDate;
+    }
+
+    public String getDocumentHash() {
+        return documentHash;
+    }
+
+    public String getHashAlgorithm() {
+        return hashAlgorithm;
     }
 
     public String getErrorMessage() {
@@ -34,19 +46,27 @@ public class VerificationDetails {
         this.signatureValidity = signatureValidity;
     }
 
-    public void setCertificateTrust(String certificateTrust) {
-        this.certificateTrust = certificateTrust;
+    public void setSigningDate(String signingDate) {
+        this.signingDate = signingDate;
+    }
+
+    public void setDocumentHash(String documentHash) {
+        this.documentHash = documentHash;
+    }
+
+    public void setHashAlgorithm(String hashAlgorithm) {
+        this.hashAlgorithm = hashAlgorithm;
     }
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
-    public CertificateInfos getExtraInfos() {
+    public CertificateInfos getCertificateInfos() {
         return certificateInfos;
     }
 
-    public void setExtraInfos(CertificateInfos certificateInfos) {
+    public void setCertificateInfos(CertificateInfos certificateInfos) {
         this.certificateInfos = certificateInfos;
     }
 }

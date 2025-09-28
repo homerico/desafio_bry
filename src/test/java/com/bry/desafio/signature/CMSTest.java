@@ -43,6 +43,12 @@ public class CMSTest {
     private static byte[] content;
     private static byte[] signedContent;
 
+    /** Configura o ambiente de testes:
+     * - Adiciona o provider Bouncy Castle como o primeiro da lista
+     * - Carrega as âncoras de confiança e intermediários
+     * - Carrega o conteúdo a ser assinado
+     * - Carrega o KeyStore com o certificado e a chave privada do assinante
+     */
     @BeforeAll
     public static void setup() {
         // Adiciona o provider Bouncy Castle como o primeiro da lista, assim sempre será ele a prover os serviços
@@ -142,8 +148,23 @@ public class CMSTest {
             Report report = signatureVerifier.getVerificationReport();
             assertEquals(Status.VALID, report.isIntegrityValid());
             assertEquals(Status.TRUSTED, report.isCertificateTrusted());
+            printInfos(report);
         } catch (SignerException | VerifierException | KeyStoreException e) {
             fail(e.getMessage(), e.getCause());
         }
+    }
+
+    /** Imprime no console as informações do relatório de verificação.
+     *
+     * @param report O relatório de verificação a ser impresso.
+     */
+    private void printInfos(Report report) {
+        System.out.println("----- Relatório de Verificação -----");
+        System.out.println("Integridade da assinatura: " + report.isIntegrityValid());
+        System.out.println("Confiança do certificado: " + report.isCertificateTrusted());
+        System.out.println("Nome do signatário: " + report.getCertificateReport().getSignerName());
+        System.out.println("Data da assinatura: " + report.getSigningDate());
+        System.out.println("Algoritmo de hash: " + report.getHashAlgorithm());
+        System.out.println("Hash do documento: " + report.getDocumentHash());
     }
 }

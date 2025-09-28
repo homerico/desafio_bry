@@ -7,6 +7,8 @@ public class CertificateReport {
 
     // Status da confiança da certificação
     private Status isCertificateTrusted;
+    // Nome do signatário
+    private String signerName;
 
     public CertificateReport() {
         this.isCertificateTrusted = Status.INDETERMINATE;
@@ -16,7 +18,15 @@ public class CertificateReport {
         return isCertificateTrusted;
     }
 
+    public String getSignerName() {
+        return signerName;
+    }
+
     public void setIsCertificateTrusted(boolean certificateTrusted) {
         isCertificateTrusted = certificateTrusted ? Status.TRUSTED : Status.UNTRUSTED;
+    }
+
+    public void setSignerName(String signerName) {
+        this.signerName = signerName;
     }
 }

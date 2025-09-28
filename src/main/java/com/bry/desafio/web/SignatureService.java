@@ -8,6 +8,7 @@ import com.bry.desafio.exceptions.SignerException;
 import com.bry.desafio.signature.utils.KeyStoreUtils;
 import com.bry.desafio.signature.verifier.CMSVerifier;
 import com.bry.desafio.exceptions.VerifierException;
+import com.bry.desafio.web.DTOs.CertificateInfos;
 import com.bry.desafio.web.DTOs.VerificationDetails;
 import com.bry.desafio.web.DTOs.VerificationResponse;
 import org.springframework.stereotype.Service;
@@ -36,22 +37,29 @@ public class SignatureService {
     }
 
     public VerificationResponse verifyCmsSignature(byte[] signatureContent) throws VerifierException {
-        VerificationResponse response = new VerificationResponse();
-
         CMSVerifier signatureVerifier = new CMSVerifier();
         signatureVerifier.verify(signatureContent);
 
         Report report = signatureVerifier.getVerificationReport();
 
+        VerificationResponse response = new VerificationResponse();
         response.setStatus(report.isValid().toString());
 
         VerificationDetails verificationDetails = new VerificationDetails();
         verificationDetails.setSignatureValidity(report.isIntegrityValid().toString());
-        verificationDetails.setCertificateTrust(report.isCertificateTrusted().toString());
+        verificationDetails.setSigningDate(report.getSigningDate());
+        verificationDetails.setDocumentHash(report.getDocumentHash());
+        verificationDetails.setHashAlgorithm(report.getHashAlgorithm());
         if (report.getException() != null) {
             verificationDetails.setErrorMessage(report.getException());
         }
         response.setVerificationDetails(verificationDetails);
+
+        CertificateInfos certificateInfos = new CertificateInfos();
+        certificateInfos.setCertificateTrust(report.isCertificateTrusted().toString());
+        certificateInfos.setSignerName(report.getSignerName());
+
+        verificationDetails.setCertificateInfos( certificateInfos);
 
         return response;
     }

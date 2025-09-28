@@ -2,12 +2,15 @@ package com.bry.desafio.signature.verifier;
 
 import com.bry.desafio.exceptions.SignerCertificateException;
 import com.bry.desafio.exceptions.VerifierException;
+import com.bry.desafio.signature.Algorithms;
 import com.bry.desafio.signature.certificate.SignerCertificateWrapper;
-import com.bry.desafio.signature.certificate.TrustAnchors;
-import com.bry.desafio.signature.report.CertificateReport;
 import com.bry.desafio.signature.report.Report;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
+import org.bouncycastle.asn1.cms.Time;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerInformation;
@@ -15,10 +18,12 @@ import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Store;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.bry.desafio.exceptions.VerifierException.SIGNATURE_PROCESSING_ERROR;
@@ -78,6 +83,7 @@ public class CMSVerifier {
                 signerCertificateWrapper.validate(certStore);
 
                 verificationReport.setCertificateTrusted(true);
+                this.fullfillReport(verificationReport, signer);
             } catch (CertificateException | CertPathValidatorException | InvalidAlgorithmParameterException |
                      NoSuchAlgorithmException e) {
                 verificationReport.setCertificateTrusted(false);
@@ -86,6 +92,66 @@ public class CMSVerifier {
 
         }
     }
+
+    /**
+     * Preenche o relatório de verificação com informações adicionais.
+     *
+     * @param verificationReport O relatório de verificação a ser preenchido.
+     * @param signer             A informação do assinante.
+     */
+    private void fullfillReport(Report verificationReport, SignerInformation signer) {
+        verificationReport.getCertificateReport().setSignerName(signerCertificateWrapper.extractCommonName());
+        verificationReport.setSigningDate(getSigningTime(signer));
+        verificationReport.setDocumentHash(getDocumentHash(signer));
+        verificationReport.setHashAlgorithm(getHashAlgorithm(signer));
+    }
+
+    /**
+     * Extrai o algoritmo de hash utilizado na assinatura.
+     *
+     * @param signer A informação do assinante.
+     * @return O nome do algoritmo de hash.
+     */
+    private String getHashAlgorithm(SignerInformation signer) {
+        AlgorithmIdentifier digestAlgId = signer.getDigestAlgorithmID();
+        String oid = digestAlgId.getAlgorithm().getId();
+        String hashName = Algorithms.getDigestAlgorithmByOID(oid);
+        if (hashName == null) {
+            hashName = "Desconhecido";
+        }
+        return oid + " (" + hashName + ")";
+    }
+
+    /**
+     * Extrai o hash do documento assinado.
+     *
+     * @param signer A informação do assinante.
+     * @return O hash do documento em formato hexadecimal.
+     */
+    private String getDocumentHash(SignerInformation signer) {
+        return Hex.toHexString(signer.getContentDigest());
+    }
+
+    /**
+     * Extrai o tempo de assinatura dos atributos assinados.
+     *
+     * @param signer A informação do assinante.
+     * @return A data e hora da assinatura formatada.
+     */
+    public String getSigningTime(SignerInformation signer) {
+        AttributeTable signedAttributes = signer.getSignedAttributes();
+        if (signedAttributes != null) {
+            Attribute signingTimeAttr = signedAttributes.get(CMSAttributes.signingTime);
+            if (signingTimeAttr != null) {
+                Time time = Time.getInstance(signingTimeAttr.getAttrValues().getObjectAt(0).toASN1Primitive());
+                Date date = time.getDate();
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                return sdf.format(date);
+            }
+        }
+        return null;
+    }
+
 
     public Report getVerificationReport() {
         return verificationReport;

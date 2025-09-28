@@ -10,6 +10,12 @@ public class Report {
 
     // Status da integridade da assinatura
     private Status isIntegrityValid;
+    // Data da assinatura
+    private String signingDate;
+    // Hash do documento assinado
+    private String documentHash;
+    // Algoritmo de hash utilizado
+    private String hashAlgorithm;
     // Erro ocorrido durante o processo de verificação, se houver
     private String exception;
     private CertificateReport certificateReport;
@@ -21,6 +27,10 @@ public class Report {
 
     public Status isValid() {
         return allValid(isIntegrityValid, certificateReport.getIsCertificateTrusted(), exception == null ? Status.VALID : Status.INVALID);
+    }
+
+    public CertificateReport getCertificateReport() {
+        return certificateReport;
     }
 
     public Status isIntegrityValid() {
@@ -35,6 +45,22 @@ public class Report {
         return exception;
     }
 
+    public String getSigningDate() {
+        return signingDate;
+    }
+
+    public String getDocumentHash() {
+        return documentHash;
+    }
+
+    public String getHashAlgorithm() {
+        return hashAlgorithm;
+    }
+
+    public String getSignerName() {
+        return certificateReport.getSignerName();
+    }
+
     public void setIntegrityValid(boolean integrityValid) {
         isIntegrityValid = integrityValid ? Status.VALID : Status.INVALID;
     }
@@ -45,6 +71,18 @@ public class Report {
 
     public void setException(String exception) {
         this.exception = exception;
+    }
+
+    public void setSigningDate(String signingDate) {
+        this.signingDate = signingDate;
+    }
+
+    public void setDocumentHash(String documentHash) {
+        this.documentHash = documentHash;
+    }
+
+    public void setHashAlgorithm(String hashAlgorithm) {
+        this.hashAlgorithm = hashAlgorithm;
     }
 
     public static Status allValid(Status... statuses) {

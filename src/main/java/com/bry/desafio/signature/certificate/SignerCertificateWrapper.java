@@ -11,6 +11,8 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.bry.desafio.exceptions.SignerCertificateException.DIFFERENT_SIGNER_CERTIFICATE_FOUND;
 import static com.bry.desafio.exceptions.SignerCertificateException.SIGNER_CERTIFICATE_NOT_FOUND;
@@ -97,6 +99,18 @@ public class SignerCertificateWrapper {
 
         CertPathValidator validator = CertPathValidator.getInstance("PKIX");
         validator.validate(certPath, pkixParams);
+    }
+
+    public String extractCommonName() {
+        String subjectPrincipalName = signerCertificate.getSubjectX500Principal().getName();
+        // Usa regex para encontrar o valor associado a "CN="
+        Pattern pattern = Pattern.compile("CN=([^,]+)");
+        Matcher matcher = pattern.matcher(subjectPrincipalName);
+        if (matcher.find()) {
+            // Retorna o primeiro grupo capturado, que é o valor do CN
+            return matcher.group(1);
+        }
+        return subjectPrincipalName;
     }
 
     /**
