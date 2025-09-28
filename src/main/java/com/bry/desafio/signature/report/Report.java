@@ -1,8 +1,5 @@
 package com.bry.desafio.signature.report;
 
-
-import org.json.JSONObject;
-
 /**
  * Classe que representa o relatório de verificação da assinatura.
  * Contém informações sobre a integridade da assinatura, a confiança do certificado
@@ -10,23 +7,53 @@ import org.json.JSONObject;
  */
 public class Report {
 
+    public enum Status {
+        VALID("Válido"), INVALID("Inválido"),
+        TRUSTED("Confiável"), UNTRUSTED("Não Confiável"),
+        INDETERMINATE("Indeterminado");
+
+        private final String name;
+
+        Status(String name) {
+            this.name = name;
+        }
+        
+        public static Status allValid(Status... statuses) {
+            for (Status status : statuses) {
+                if (status != VALID && status != TRUSTED) {
+                    return INVALID;
+                }
+            }
+            return VALID;
+        }
+        
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
     // Status da integridade da assinatura
-    private boolean isIntegrityValid;
+    private Status isIntegrityValid;
     // Status da confiança do certificação
-    private boolean isCertificateTrusted;
+    private Status isCertificateTrusted;
     // Erro ocorrido durante o processo de verificação, se houver
     private Exception exception;
 
     public Report() {
-        this.isIntegrityValid = false;
-        this.isCertificateTrusted = false;
+        this.isIntegrityValid = Status.INDETERMINATE;
+        this.isCertificateTrusted = Status.INDETERMINATE;
     }
 
-    public boolean isIntegrityValid() {
+    public Status isValid() {
+        return Status.allValid(isIntegrityValid, isCertificateTrusted, exception == null ? Status.VALID : Status.INVALID);
+    }
+
+    public Status isIntegrityValid() {
         return isIntegrityValid;
     }
 
-    public boolean isCertificateTrusted() {
+    public Status isCertificateTrusted() {
         return isCertificateTrusted;
     }
 
@@ -35,34 +62,14 @@ public class Report {
     }
 
     public void setIntegrityValid(boolean integrityValid) {
-        isIntegrityValid = integrityValid;
+        isIntegrityValid = integrityValid ? Status.VALID : Status.INVALID;
     }
 
     public void setCertificateTrusted(boolean certificateTrusted) {
-        isCertificateTrusted = certificateTrusted;
+        isCertificateTrusted = certificateTrusted ? Status.TRUSTED : Status.UNTRUSTED;
     }
-
 
     public void setException(Exception exception) {
         this.exception = exception;
-    }
-
-    /**
-     * Converte o relatório para um objeto JSON. Facilita a transmissão do relatório pela API.
-     *
-     * @return JSONObject representando o relatório de verificação.
-     */
-    public JSONObject toJSONbject() {
-        JSONObject report = new JSONObject();
-        report.put("Status", isIntegrityValid && isCertificateTrusted ? "Válido" : "Inválido");
-
-        JSONObject json = new JSONObject();
-        report.put("Detalhes", json);
-        json.put("Integridade", isIntegrityValid ? "Válida" : "Inválida");
-        json.put("Certificação", isCertificateTrusted ? "Confiável" : "Não confiável");
-        if (exception != null) {
-            json.put("Erro: ", exception.getMessage());
-        }
-        return report;
     }
 }

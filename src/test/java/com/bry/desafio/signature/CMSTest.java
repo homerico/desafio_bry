@@ -1,6 +1,7 @@
 package com.bry.desafio.signature;
 
 
+import com.bry.desafio.Configuration;
 import com.bry.desafio.signature.report.Report;
 import com.bry.desafio.signature.signer.CMSSigner;
 import com.bry.desafio.signature.signer.SignerException;
@@ -28,13 +29,6 @@ public class CMSTest {
 
     // Hash SHA-512 de referência do conteúdo em doc.txt obtido com a ferramenta online https://www.dcode.fr/sha512-hash
     private static final String digestReference = "dc1a7de77c59a29f366a4b154b03ad7d99013e36e08beb50d976358bea7b045884fe72111b27cf7d6302916b2691ac7696c1637e1ab44584d8d6613825149e35";
-    private static final String certificateAlias = "{e2618a8b-20de-4dd2-b209-70912e3177f4}";
-    private static final String certificatePassword = "bry123456";
-    private static final String digestAlgorithm = Algorithms.DIGEST_ALGORITHMS.SHA512.name();
-    private static final String signatureAlgorithm = Algorithms.SIGNATURE_ALGORITHMS.SHA512withRSA.name();
-    private static final String docToBeSigned = "arquivos/doc.txt";
-    private static final String trustAnchorPath = "cadeia/";
-    private static final String keyStoreFile = "pkcs12/certificado_teste_hub.pfx";
     private static final String artifactsPath = "artefatos/";
     private static final String digestFile = "resumo.txt";
     private static final String signatureFile = "assinatura.p7s";
@@ -50,13 +44,13 @@ public class CMSTest {
 
         // Carrega as âncoras de confiança
         try {
-            TrustAnchors.loadTrustAnchors(trustAnchorPath);
+            TrustAnchors.loadTrustAnchors(Configuration.trustAnchorPath);
         } catch (CertificateException | IOException | URISyntaxException e) {
             fail("Falha ao carregar as âncoras de confiança.", e);
         }
 
         // Carrega o conteúdo a ser assinado
-        try (InputStream is = CMSTest.class.getClassLoader().getResourceAsStream(docToBeSigned)){
+        try (InputStream is = CMSTest.class.getClassLoader().getResourceAsStream(Configuration.docToBeSigned)){
             assertNotNull(is);
             content = is.readAllBytes();
         } catch (IOException e) {
@@ -64,9 +58,9 @@ public class CMSTest {
         }
 
         // Carrega o repositório de chaves
-        try (InputStream is = CMSTest.class.getClassLoader().getResourceAsStream(keyStoreFile)) {
+        try (InputStream is = CMSTest.class.getClassLoader().getResourceAsStream(Configuration.keyStoreFile)) {
             assertNotNull(is);
-            keyStore = KeyStoreUtils.getKeyStore(is, certificatePassword.toCharArray());
+            keyStore = KeyStoreUtils.getKeyStore(is, Configuration.certificatePassword.toCharArray());
         } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException e) {
             fail("Falha ao carregar o repositório de chaves.", e);
         }
@@ -109,7 +103,7 @@ public class CMSTest {
         byte[] hashedContent = null;
 
         try {
-            hashedContent = toBeSignedContent.getHash(digestAlgorithm);
+            hashedContent = toBeSignedContent.getHash(Configuration.digestAlgorithm);
         } catch (SignerException e) {
             fail(e.getMessage(), e.getCause());
         }
@@ -124,11 +118,11 @@ public class CMSTest {
     @Test
     public void isSignatureValid() {
         try {
-            PrivateKey privateKey = KeyStoreUtils.getPrivateKeyData(keyStore, certificateAlias, certificatePassword.toCharArray());
+            PrivateKey privateKey = KeyStoreUtils.getPrivateKeyData(keyStore, Configuration.certificateAlias, Configuration.certificatePassword.toCharArray());
 
-            X509Certificate x509Certificate = KeyStoreUtils.getCertificateData(keyStore, certificateAlias);
+            X509Certificate x509Certificate = KeyStoreUtils.getCertificateData(keyStore, Configuration.certificateAlias);
 
-            CMSSigner cmsSigner = new CMSSigner(x509Certificate, privateKey, signatureAlgorithm);
+            CMSSigner cmsSigner = new CMSSigner(x509Certificate, privateKey, Configuration.signatureAlgorithm);
             signedContent = cmsSigner.sign(content);
 
             assertNotNull(signedContent);
@@ -138,8 +132,8 @@ public class CMSTest {
             signatureVerifier.verify(signedContent);
 
             Report report = signatureVerifier.getVerificationReport();
-            assertTrue(report.isIntegrityValid());
-            assertTrue(report.isCertificateTrusted());
+            assertEquals(Report.Status.VALID, report.isIntegrityValid());
+            assertEquals(Report.Status.TRUSTED, report.isCertificateTrusted());
         } catch (SignerException | VerifierException e) {
             fail(e.getMessage(), e.getCause());
         } catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException |
