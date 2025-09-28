@@ -43,6 +43,8 @@ public class SignatureController {
         } catch (IOException | UnrecoverableKeyException | CertificateException | KeyStoreException |
                  NoSuchAlgorithmException e) {
             return ResponseEntity.badRequest().body("Erro ao processar a solicitação - " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Erro inesperado - " + e.getMessage());
         }
     }
 
