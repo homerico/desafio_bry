@@ -1,12 +1,12 @@
-package com.bry.desafio;
+package com.bry.desafio.signature;
 
 
-import com.bry.desafio.report.Report;
-import com.bry.desafio.signer.CMSSigner;
-import com.bry.desafio.signer.SignerException;
-import com.bry.desafio.utils.KeyStoreUtils;
-import com.bry.desafio.verifier.CMSVerifier;
-import com.bry.desafio.verifier.VerifierException;
+import com.bry.desafio.signature.report.Report;
+import com.bry.desafio.signature.signer.CMSSigner;
+import com.bry.desafio.signature.signer.SignerException;
+import com.bry.desafio.signature.utils.KeyStoreUtils;
+import com.bry.desafio.signature.verifier.CMSVerifier;
+import com.bry.desafio.signature.verifier.VerifierException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.AfterAll;

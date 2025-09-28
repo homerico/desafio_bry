@@ -1,7 +1,7 @@
-package com.bry.desafio.verifier;
+package com.bry.desafio.signature.verifier;
 
-import com.bry.desafio.TrustAnchors;
-import com.bry.desafio.report.Report;
+import com.bry.desafio.signature.TrustAnchors;
+import com.bry.desafio.signature.report.Report;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.CMSException;
@@ -18,7 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
 import java.util.*;
 
-import static com.bry.desafio.verifier.VerifierException.SIGNATURE_PROCESSING_ERROR;
+import static com.bry.desafio.signature.verifier.VerifierException.SIGNATURE_PROCESSING_ERROR;
 
 /**
  * Classe para verificação de assinaturas no formato CMS (Cryptographic Message Syntax).

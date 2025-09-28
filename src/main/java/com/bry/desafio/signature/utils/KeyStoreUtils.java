@@ -1,4 +1,4 @@
-package com.bry.desafio.utils;
+package com.bry.desafio.signature.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

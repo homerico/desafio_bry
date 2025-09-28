@@ -1,4 +1,4 @@
-package com.bry.desafio.signer;
+package com.bry.desafio.signature.signer;
 
 public class SignerException extends Exception {
 

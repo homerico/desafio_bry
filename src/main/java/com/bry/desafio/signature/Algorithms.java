@@ -1,4 +1,4 @@
-package com.bry.desafio;
+package com.bry.desafio.signature;
 
 import java.util.List;
 import java.util.stream.Stream;

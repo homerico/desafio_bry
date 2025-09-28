@@ -1,12 +1,12 @@
-package com.bry.desafio;
+package com.bry.desafio.signature;
 
-import com.bry.desafio.signer.SignerException;
+import com.bry.desafio.signature.signer.SignerException;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static com.bry.desafio.signer.SignerException.INVALID_DIGEST_ALGORITHM;
-import static com.bry.desafio.signer.SignerException.NOT_SUPPORTED_DIGEST_ALGORITHM;
+import static com.bry.desafio.signature.signer.SignerException.INVALID_DIGEST_ALGORITHM;
+import static com.bry.desafio.signature.signer.SignerException.NOT_SUPPORTED_DIGEST_ALGORITHM;
 
 public class ToBeSignedContent {
 

@@ -1,4 +1,4 @@
-package com.bry.desafio.verifier;
+package com.bry.desafio.signature.verifier;
 
 public class VerifierException extends Exception{
 
