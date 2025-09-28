@@ -1,6 +1,7 @@
 package com.bry.desafio.signer;
 
 import com.bry.desafio.Algorithms;
+import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.*;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -9,6 +10,8 @@ import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.bry.desafio.signer.SignerException.*;
 
@@ -51,11 +54,23 @@ public class CMSSigner {
         // Gera as informações do assinante na estrutura necessária para ser adicionada na assinatura
         SignerInfoGenerator signerInfoGenerator = null;
         try {
-            signerInfoGenerator = new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").build(signatureAlgorithm, privateKey, certificate);
+            signerInfoGenerator = new JcaSimpleSignerInfoGeneratorBuilder().build(signatureAlgorithm, privateKey, certificate);
         } catch (OperatorCreationException | CertificateEncodingException e) {
             throw new SignerException(SIGNER_INFORMATION_ERROR, e);
         }
         cmsSignedDataGenerator.addSignerInfoGenerator(signerInfoGenerator);
+
+        //  Anexa o certificado do signatário
+        try {
+            List<X509Certificate> certList = new ArrayList<>();
+            certList.add(certificate);
+
+            JcaCertStore certs = new JcaCertStore(certList);
+
+            cmsSignedDataGenerator.addCertificates(certs);
+        } catch (CertificateEncodingException | CMSException e) {
+            throw new SignerException(CERTIFICATE_ADDITION_ERROR, e);
+        }
 
         // Por fim, gera a assinatura
         try {
