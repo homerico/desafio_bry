@@ -82,14 +82,17 @@ public class CMSVerifier {
             try {
                 signerCertificateWrapper.validate(certStore);
 
+                // Se não dar exceção, o certificado é confiável
                 verificationReport.setCertificateTrusted(true);
-                this.fullfillReport(verificationReport, signer);
             } catch (CertificateException | CertPathValidatorException | InvalidAlgorithmParameterException |
                      NoSuchAlgorithmException e) {
                 verificationReport.setCertificateTrusted(false);
                 verificationReport.setException(e.getMessage());
             }
 
+            if (verificationReport.isValid().toBoolean()) {
+                this.fullfillReport(verificationReport, signer);
+            }
         }
     }
 

@@ -15,4 +15,8 @@ public enum Status {
     public String toString() {
         return name;
     }
+
+    public boolean toBoolean() {
+        return this == VALID || this == TRUSTED;
+    }
 }
